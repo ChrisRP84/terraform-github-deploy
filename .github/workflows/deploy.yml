@@ -1,4 +1,4 @@
-name: Deploy helloWorld.html to GitHub Pages
+name: Docker page CI/CD
 
 on:
   pull_request:
@@ -6,19 +6,28 @@ on:
       - 'release/**'
 
 jobs:
-  deploy:
+  docker-orchestration:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Validar HTML (exemplo)
+      - name: Build da imagem Docker
         run: |
-          echo "Simulando lint"
+          docker build -t hello-world-page .
 
-      - name: Build and Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./ 
+      - name: Rodar container
+        run: |
+          docker run -d --name hello-world -p 8080:80 hello-world-page
+
+      - name: Testa se o container está rodando (localhost)
+        run: |
+          sleep 5
+          curl -I http://localhost:8080 | grep "200 OK"
+
+      - name: Para e remove container
+        if: always()
+        run: |
+          docker stop hello-world
+          docker rm hello-world
