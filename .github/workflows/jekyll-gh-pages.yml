@@ -1,7 +1,7 @@
 name: Docker page RUN container CI/CD
 
 on:
-  pull_request:
+  push:
     branches:
       - 'master'
 
